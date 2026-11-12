@@ -1,0 +1,43 @@
+
+name: Industrial MLOps Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run automated tests
+        run: |
+          pytest -v
+
+      - name: Train ML model
+        run: |
+          python train.py
+
+      - name: Build Docker image
+        run: |
+          docker build -t ifm-industrial-mlops:latest .
+
+      - name: Upload model artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: industrial-ml-model
+          path: model.joblib
